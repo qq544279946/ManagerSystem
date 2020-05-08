@@ -1,21 +1,30 @@
 import React, { Component } from 'react'
 import { Form, Icon, Input, Button ,message} from 'antd';
-
+import {Redirect} from 'react-router-dom'
 import {reqLogin} from '../../api'
-import logo from './images/logo.png'
+import logo from '../../assets/images/logo.png'
 import './login.less'
-
+import memoryUtils from '../../utils/memoryUtils';
+import userUtils from '../../utils/storageUtils';
 
 
 class Login extends Component {
 
 
-    handleSubmit = e => {
+    handleSubmit = (e) => {
         e.preventDefault();
-        this.props.form.validateFields((err, values) => {
+        this.props.form.validateFields(async (err, values) => {
             if (!err) {
-              console.log('Received values of form: ', values);
-              message.info('发送ajax')
+              let {username,password} = values;
+              let result = await reqLogin(username,password);
+              if(result.status === 0){
+                message.success('登录成功');
+                userUtils.saveUser(result.data);
+                memoryUtils.user = result.data;
+                this.props.history.replace('/');
+              }else if(result.status === 1){
+                  message.error(result.msg);
+              }
             }else{
                 message.info('验证失败')
             }
@@ -23,7 +32,11 @@ class Login extends Component {
     };
 
     render() {
-
+       
+        const user = memoryUtils.user;
+        if(user._id){
+            return <Redirect to='/'/>
+        }
         const { getFieldDecorator } = this.props.form;
         return (
             <div className="login">

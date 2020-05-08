@@ -6,11 +6,10 @@
 
 
  export function reqLogin(username,password){
-    ajax({
+    return ajax({
         method:'post',
         url:'/login',
         data:{username,password}
     });
 }
 
-reqLogin('admin','admin');
